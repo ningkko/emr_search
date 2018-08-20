@@ -24,7 +24,6 @@ def search():
 
 	# create searcher
 	searcher = ix.searcher()
-	parser = QueryParser("content", schema=ix.schema)
 
 	# write data to the searcher
 	writer = ix.writer()
@@ -39,32 +38,22 @@ def search():
 	search_term,filter_term = _get_input()[0],_get_input()[1]
 
 
-	qp = QueryParser("content", schema=ix.schema)
+	qp = QueryParser(search_term, schema=ix.schema)
 	q = qp.parse(search_term)
-	with ix.searcher() as searcher:
+	with ix.searcher() as s:
 
 		results = s.search(q, limit = 20)
 
 	print(results)
 
-
-
-'''for keyword in ("水果世博园","你","first","中文","交换机","交换"):
-    print("result of ",keyword)
-    q = parser.parse(keyword)
-    results = searcher.search(q)
-    for hit in results:
-        print(hit.highlights("content"))
-    print("="*10)
-'''
 def _get_input():
 
-	search_term = input("Enter a keyword.(enter q! to exit.)")
+	search_term = input("Enter a keyword.(enter q! to exit).")
 	filter_term=[]
 
 	while True:
 	
-		q = input("Enter another keyword.(enter q! to exit.)")
+		q = input("Enter another keyword.(enter q! to exit).")
 		if q == "q!":
 			break
 		else:
@@ -78,13 +67,12 @@ def _get_input():
 		return filter_term
 
 	while True:
-		
+
+		q = input("Enter the filter term (Enter q! to exit).")
 		if q == "q!":
 			break
 		else:
 			filter_term.append(_get_filter_term())
-			q = input("===========DONE FOR ONE ===========\nDone? Enter q! to exit.")
-			print("Another filter term:")
 
 
 	return[search_term,filter_term]
