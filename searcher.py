@@ -5,13 +5,36 @@ from whoosh.qparser import QueryParser
 import json
 import whoosh.reading
 
-def searcher():
+def search():
+
+	sys.path.append("../")	
 	
-	sys.path.append("../")
-	# load data
-	with open("medical_records.json") as file:
+	data = _load_data("medical_records.json")
+
+	objects = _init(data)
+	ix = objects[0]
+	searcher = objects[1]
+	
+	search_term = _get_search_term()
+	num = int(input("Enter the number of results."))
+
+	query = QueryParser("content", schema=ix.schema).parse(search_term)
+
+	with ix.searcher() as searcher:
+		results = searcher.search(query, limit = num)
+		print(len(results))
+
+		
+def _load_data(file_name):
+
+	with open(file_name) as file:
 		for line in file:
 			data = json.loads(line)
+	
+	return data
+
+
+def _init(data):
 
 	# create schema
 	schema = Schema(title=TEXT(stored=True), path=ID(stored=True), content=TEXT(stored=True))
@@ -23,9 +46,13 @@ def searcher():
 	
 	# create searcher
 	searcher = ix.searcher()
-	parser = QueryParser("content", schema=ix.schema)
+	#parser = QueryParser("content", schema=ix.schema)
 
-	# write data to the searcher
+	return[ix,searcher]
+
+
+def _write_data(ix,data):
+
 	writer = ix.writer()
 	
 	for i in range(0,len(data)):
@@ -33,47 +60,42 @@ def searcher():
 	        title=data[i]["id"],
 	        content=data[i]["body"]
 	    )
-	#    print(data[i][0]["id"])
 
 	writer.commit()
-
-	# get user input
-	search_term = _get_search_term()
-
-	qp = QueryParser("content", schema=ix.schema)
-	q = qp.parse(search_term)
-
-	with ix.searcher() as searcher:
-		results = searcher.search(q, limit = 20)
-		print(len(results))
 
 
 def _get_search_term():
 
-	search_term = input("Enter a keyword.(enter q! to exit).")
+	search_term = input("Enter a keyword.")
 
 	while True:
 	
-		q = input("Enter another keyword.(enter q! to exit).")
+		q = input("Enter another keyword.(enter y to exit).")
 		
-		if q == "q!":
+		if q == "y":
 			break
-		else:
-			search_term = search_term + q
+		else: search_term = search_term + q
 
 	return search_term
 
-'''	while True:
-		
-			
-	filter_term.append(input("Enter the name of the filter term."))
-	filter_term.append(input("Enter the sign of the filter term(>/</=)."))
-	filter_term.append(input("Enter the numerical value of the filter term."))
-	return filter_term
+def _get_filter_term():
+
+	filter_terms = []
+	while True:
+		filter_term = []
+
+		quit = input("quit?(y/n)")	
+
 		if q == "q!":
 			break
+
 		else:
-			filter_terms.append(q)
-'''
+			filter_term.append(input("Name of the filter term: "))
+			filter_term.append(input("Sign(>/</=): "))
+			filter_term.append(input("Numerical value: "))
+
+			filter_terms.append(filter_term)
+
+	return filter_terms
 
 search()
