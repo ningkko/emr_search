@@ -5,18 +5,20 @@ from whoosh.qparser import QueryParser
 import json
 import whoosh.reading
 
-def search():
+def searcher():
 
 	sys.path.append("../")	
 	
 	data = _load_data("medical_records.json")
 
-	objects = _init(data)
+	objects = _init()
 	ix = objects[0]
 	searcher = objects[1]
+
+	_write_data(ix,data)
 	
 	search_term = _get_search_term()
-	num = int(input("Enter the number of results."))
+	num = int(input("Enter the number of results: "))
 
 	query = QueryParser("content", schema=ix.schema).parse(search_term)
 
@@ -24,7 +26,7 @@ def search():
 		results = searcher.search(query, limit = num)
 		print(len(results))
 
-		
+
 def _load_data(file_name):
 
 	with open(file_name) as file:
@@ -34,7 +36,7 @@ def _load_data(file_name):
 	return data
 
 
-def _init(data):
+def _init():
 
 	# create schema
 	schema = Schema(title=TEXT(stored=True), path=ID(stored=True), content=TEXT(stored=True))
@@ -66,15 +68,16 @@ def _write_data(ix,data):
 
 def _get_search_term():
 
-	search_term = input("Enter a keyword.")
+	search_term = input("Enter a keyword: ")
 
 	while True:
 	
-		q = input("Enter another keyword.(enter y to exit).")
+		q = input("Enter another keyword.(enter y to exit): ")
 		
 		if q == "y":
 			break
-		else: search_term = search_term + q
+		else:
+			search_term = search_term + " "+q
 
 	return search_term
 
@@ -97,5 +100,3 @@ def _get_filter_term():
 			filter_terms.append(filter_term)
 
 	return filter_terms
-
-search()
