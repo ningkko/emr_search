@@ -1,13 +1,14 @@
 import json
+import config
 import re
 import jieba
 import jieba.analyse
 import textwrap
 from functools import reduce
 
-def parse(file_name):
+
+def clear_up(file_name):
     
-    dicts = ["../dicts/jyxm.txt","../dicts/userdict.txt","../dicts/medi.txt","../dicts/stop.txt"]
     data_collection=[]
     with open(file_name) as file:
         for line in file:
@@ -18,26 +19,25 @@ def parse(file_name):
     for data in data_collection:
 
         ID = data["_id"]
-        print(ID)
 
-        body = _get_cleaned_text(data)
+        text_body = _get_cleaned_text(data)
         
         jybg = json.loads(data["original_jybg_data"])["jybg"]
         if len(jybg)!=0:
             name = _get_name(jybg[0])
             date = _get_date(jybg[0])
         
-        #jyxm = _get_value(dicts[0],body)[0]
+        #jyxm = _get_value(dicts[0],text_body)[0]
         jyxm = _get_jybg(data)[0]
-        #tags = _get_value(dicts[0],body)[1]
+        #tags = _get_value(dicts[0],text_body)[1]
         tags = _get_jybg(data)[1]
-        tags = _get_tag(body, tags, dicts)
+        tags = _get_tag(text_body, tags, dicts)
 
         document = {}
         document["id"] = ID
         document["name"] = name
         document["dateS"] = date
-        document["body"] = body
+        document["text_body"] = text_body
         document["tags"] = tags
         document["jyxm"] = jyxm
 
@@ -45,10 +45,38 @@ def parse(file_name):
 
     _dump(documents)
 
-def _dump(documents):
+def refresh():
+    '''refresh after updating dictionaries.
+    '''
+    _load_dicts()
+    clear_up()
 
-    with open('medical_records.json', 'w') as json_file:
-        json_file.write(json.dumps(documents,ensure_ascii = False))
+
+def _load_dicts():
+
+    global userDict
+    global mediDict
+    global checkDict
+    global stopDict
+
+    userDict = open(config.path["userdict"],'r')
+    mediDict = open(config.path["medi"],'r')
+    checkDict = open(config.path["check_terms"],'r')
+    stopDict = open(config.path["stop_words"],'r')
+
+
+def _dump(documents):
+    
+    try:
+        with open('medical_records.json', 'w') as json_file:
+            json_file.write(json.dumps(documents,ensure_ascii = False))
+        print("SUCEEDED CLEARING UP.")
+
+    except:
+        print("FAILED CLEARING UP JSON...")
+    
+    finally:
+        print("DUMPING COMPELETED.")
 
 
 def _get_cleaned_text(data):
@@ -111,8 +139,8 @@ def _divide_Text(text):
     '''
     returns the divided text
     '''
-    jieba.load_userdict("dicts/medi.txt")
-    jieba.load_userdict("dicts/userdict.txt")
+    jieba.load_userdict(medi)
+    jieba.load_userdict(userdict)
     seg_list = jieba.cut(text, cut_all=False)
     return seg_list
 
@@ -134,7 +162,8 @@ def _is_uchar(uchar):
     return False
 
 
-def _get_value(dict,body):
+def _get_value(dict,text_body):
+
     '''
     documents checks and values of the patient. data stored in the form of 
 
@@ -174,15 +203,15 @@ def _get_value(dict,body):
     # loop thru all terms in the provided list
     for term in terms:
         
-        time = body.count(term)
+        time = text_body.count(term)
         termPattern = re.compile(re.escape(term))
 
         #if the term appears for more than once
         if time>=1:
             termlist.append(term)
             # check if the term is a category
-            firstIndex = body.find(term)
-            followingTerm = catPattern.search(body[firstIndex+1:]).group()
+            firstIndex = text_body.find(term)
+            followingTerm = catPattern.search(text_body[firstIndex+1:]).group()
             FTcleaned = followingTerm.replace("：","").replace(":","").replace(" ","")
 
             # if the term is not a category, then get its corresponding value
@@ -190,12 +219,12 @@ def _get_value(dict,body):
                 # document the value
                 values=[]
 
-                for match in re.finditer(termPattern,body):
+                for match in re.finditer(termPattern,text_body):
                     
                     value = []
                     index = match.span()[1]
-                    num = numPattern.search(body[index+1:])
-                    prop = propPattern.search(body[index+1:])
+                    num = numPattern.search(text_body[index+1:])
+                    prop = propPattern.search(text_body[index+1:])
                     
                     if num:
                         value.append(float(num.group()))
@@ -214,7 +243,7 @@ def _get_tag(text,tags,dicts):
     '''
     extract tags from the cleaned text
     '''   
-    jieba.analyse.set_stop_words(dicts[0])
+    jieba.analyse.set_stop_words(check_terms)
 
     n = len(text)//5
     res = jieba.analyse.extract_tags(text, topK=n)
@@ -225,21 +254,18 @@ def _get_tag(text,tags,dicts):
             tags.append(tag)
    
     #userdict
-    userDict = open(dicts[1],'r')
     for line in userDict:
         userTerm = line.replace("\n",'')
         if len(line)>1 and text.count(userTerm)>1 and not userTerm in tags:
             tags.append(userTerm)
     
     #mediDict
-    mediDict = open(dicts[2],'r')
     for line in mediDict:
         mediTerm = line.replace("\n",'')
         if len(line)>1 and text.count(mediTerm)>1 and not mediTerm in tags:
             tags.append(mediTerm)
             
     #stop
-    stopDict = open(dicts[3],'r')
     for line in stopDict:
         stopTerm = line.replace("\n",'')
         if stopTerm in tags:
@@ -272,4 +298,5 @@ def _get_jybg(data):
                         result[jyxm[i]['item_name']] = float(value.group())
                 else: 
                     pass
+
     return [result,termlist]
