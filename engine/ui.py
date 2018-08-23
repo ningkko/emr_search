@@ -3,13 +3,24 @@ def get_search_term():
 	search_term = input("Enter a keyword: ")
 
 	while True:
-	
-		q = input(  "Enter another keyword.(enter y to exit): ")
-		
-		if q == "y":
+
+		sign = ""
+		while sign != "a" and sign ! ="o" and sign != "n" and sign != "y":
+			sign = input("a(nd) | o(r) | n(ot) | y=exit: ")
+
+		if sign == "y":
 			break
-		else:
-			search_term = search_term + " "+q
+
+		elif sign == "a"
+
+			search_term+= " AND %s"%input(  "Enter another keyword(enter y to exit): ")
+		
+		elif sign == "o":
+
+			search_term+= " OR %s"%input(  "Keyword(enter y to exit): ")
+		
+		elif sign == "n":
+			search_term+= " NOT %s"%input(  "Keyword(enter y to exit): ")
 
 	return search_term
 
@@ -54,4 +65,3 @@ def add_new_words(target_dict, multi_time):
         with open(target_dict,"a") as file:
             file.write("\r%s"%new_word)
 
-    _refresh()
