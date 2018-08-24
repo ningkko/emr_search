@@ -1,17 +1,14 @@
-from setuptools import setup
+from setuptools import setup,find_packages
 
 setup(
 
-	with open("README", 'r') as f:
-   		long_description = f.read()
-
-	name = "emrs",
+	name = "emr",
 	version = "1.0",
 	description = "A search tool for medical records.",
-	author = "Nene",
+	author = "Ningkko",
 	author_email = "makiasagawa@gmail.com",
-	packages = ["emrs"],
+	packages = find_packages(),
 	install_requires = ["whoosh","jieba"],
-	scripts =["emr_search"]
+	url='https://github.com/ningkko/emr_search',
 
 	)
