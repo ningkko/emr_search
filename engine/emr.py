@@ -1,22 +1,35 @@
-from extract import clear_up,relaod
-from ui import get_search_term
-from searcher import init,search
+from extract import clear_up,refresh
+from ui import *
+from searcher import *
+import sys,os
+sys.path.append("../")  
+import config
 
-if not "medical_records.json" in os.listdir("/data/"):
-	try:
 
-		extract.clear_up("electronic-medical-record.json")
 
-	except IOError:
 
-		print("** Target file not found under /data/ **")
+while True:
 
-else:
+	if not "medical_records.json" in os.listdir("../data"):
 
-	print("Seacrhing engine set up...Start.")
-	searcher.init()
-	while True:
+		try:
+			print("BUILDING DATA...")
+			clear_up(config.config["data_path"]+"electronic-medical-record.json")
+
+		except IOError:
+			print("TARGET FILE NOT FOUND...")
+			break
+
+	else:
+
+		init()
+		ix = create_index(create_schema())
+		print("DATA BASE BUILT")
 		
-		search_term = ui.get_search_term()
-		searcher.search(search_term)
-		print("----------SEARCHING DONE---------")
+		while True:
+			
+			search_term = get_search_term()
+			#num = get_result_num()
+			search(ix,search_term)
+			print("----------SEARCHING DONE---------")
+		
