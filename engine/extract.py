@@ -1,5 +1,5 @@
 import json
-import sys
+import sys,os
 sys.path.append("../")  
 import config
 import re
@@ -15,7 +15,7 @@ def clear_up(file_name):
     with open(file_name) as file:
         for line in file:
             data_collection.append(json.loads(line))
-    
+    _load_dicts()
     documents = []
 
     for data in data_collection:
@@ -33,12 +33,12 @@ def clear_up(file_name):
         jyxm = _get_jybg(data)[0]
         #tags = _get_value(dicts[0],text_body)[1]
         tags = _get_jybg(data)[1]
-        tags = _get_tag(text_body, tags, dicts)
+        tags = _get_tag(text_body, tags)
 
         document = {}
         document["id"] = ID
         document["name"] = name
-        document["dateS"] = date
+        document["date"] = date
         document["text_body"] = text_body
         document["tags"] = tags
         document["jyxm"] = jyxm
@@ -70,7 +70,7 @@ def _load_dicts():
 def _dump(documents):
     
     try:
-        with open('medical_records.json', 'w') as json_file:
+        with open('../data/medical_records.json', 'w') as json_file:
             json_file.write(json.dumps(documents,ensure_ascii = False))
         print("SUCEEDED CLEARING UP.")
 
@@ -241,11 +241,11 @@ def _get_value(dict,text_body):
     return [jyxm,termlist]        
 
 
-def _get_tag(text,tags,dicts):
+def _get_tag(text,tags):
     '''
     extract tags from the cleaned text
     '''   
-    jieba.analyse.set_stop_words(check_terms)
+    jieba.analyse.set_stop_words(config.path["check_terms"])
 
     n = len(text)//5
     res = jieba.analyse.extract_tags(text, topK=n)
