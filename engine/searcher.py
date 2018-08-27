@@ -17,11 +17,9 @@ def init():
 		ix = create_index(schema)
 		write_data(ix)
 
-
 def create_schema():
 
 	return Schema(ID=ID(stored=True), NAME=TEXT(stored=True), BODY_TEXT=TEXT(stored=True))
-	
 	
 def create_index(schema):
 	
@@ -48,6 +46,16 @@ def search( ix, search_term ,num = 10):
 		for result in results:
 			print(result["ID"])
 
+
+def _load_data(file_name):
+
+	with open(file_name) as file:
+		for line in file:
+			data = json.loads(line)
+	
+	return data
+
+
 def write_data(ix):
 
 	data = _load_data(config.config["data_path"]+"medical_records.json")
@@ -62,12 +70,3 @@ def write_data(ix):
 	    )
 
 	writer.commit()
-
-	
-def _load_data(file_name):
-
-	with open(file_name) as file:
-		for line in file:
-			data = json.loads(line)
-	
-	return data
