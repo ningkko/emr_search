@@ -1,54 +1,78 @@
+from extract import exist
 def get_search_term():
 
-	search_term = input("Enter a keyword: ")
+    search_term = input("Enter a keyword: ")
 
-	while True:
+    while True:
 
-		sign = ""
-		while sign != "a" and sign !="o" and sign != "n" and sign != "y":
-			sign = input("a(nd) | o(r) | n(ot) | y=exit: ").lower()
-			
-		if sign == "y":
-			break
+        sign = ""
+        while sign != "a" and sign !="o" and sign != "n" and sign != "y":
+            sign = input("a(nd) | o(r) | n(ot) | y=exit: ").lower()
+            
+        if sign == "y":
+            break
 
-		elif sign == "a":
+        elif sign == "a":
 
-			search_term+= " AND %s"%input(  "Enter another keyword(enter y to exit): ")
-		
-		elif sign == "o":
+            search_term+= " AND %s"%input(  "Enter another keyword(enter y to exit): ")
+        
+        elif sign == "o":
 
-			search_term+= " OR %s"%input(  "Keyword(enter y to exit): ")
-		
-		elif sign == "n":
-			search_term+= " NOT %s"%input(  "Keyword(enter y to exit): ")
+            search_term+= " OR %s"%input(  "Keyword(enter y to exit): ")
+        
+        elif sign == "n":
+            search_term+= " NOT %s"%input(  "Keyword(enter y to exit): ")
 
-	return search_term
+    return search_term
 
 
 def get_result_num():
 
-	return int(input("Number of results to show: "))
+    return int(input("Number of results to show: "))
 
 
-def get_filter_term():
 
-	filter_terms = []
-	while True:
-		filter_term = []
+def get_filter_values():
+    '''
+    filter_values = {
+                    filter_term:[value]
+                    filter_term:[value1,value2]
+                    ...
+                    }
+    '''
 
-		quit = input("quit?(y/n)")	
+    filter_values = {}
 
-		if q == "q!":
-			break
+    while True:
+        
+        filter_term = input("Input a valued term (y = exit): ")
+        
+        if filter_term=="y":
+            break
 
-		else:
-			filter_term.append(input("Name of the filter term: "))
-			filter_term.append(input("Sign(>/</=): "))
-			filter_term.append(input("Numerical value: "))
+        else:
+        
+            if exist(filter_term):
+                mode = ""
+                while mode != "a" and mode!="i":
+                    mode = input("a(ccurate mode) | i(nterval mode): ")
 
-			filter_terms.append(filter_term)
+                if  mode == "a":
 
-	return filter_terms
+                    filter_value = input("Enter the value: ")
+                    print("----------------")
+                    filter_values[filter_term]=[filter_value]
+
+                else: 
+                    filter_value_1 = input("Bigger than: ")
+                    filter_value_2 = input("Smaller than: ")
+                    print("----------------")
+                    filter_values[filter_term]=[filter_value_1,filter_value_2]
+
+            else: print("TERM NOT EXIST...\r----------------")
+
+    return filter_values     
+
 
 def add_new_words(target_dict, multi_time):
 
