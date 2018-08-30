@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import sys,os
 sys.path.append("../")  
@@ -53,6 +54,14 @@ def refresh():
     _load_dicts()
     clear_up()
 
+
+def exist(term):
+    status = False
+    with open(config.path["check_terms"],'r') as file:
+        for line in file:
+            if term in line:
+                status = True
+                return status
 
 def _load_dicts():
 
