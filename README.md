@@ -7,3 +7,4 @@ Search engine for electronical medical records.
 1. jieba
 2. whoosh
 
+# Full Code Reserved
