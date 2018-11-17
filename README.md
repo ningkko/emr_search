@@ -6,4 +6,4 @@ Search engine for electronical medical records.
 ## Modules with relatively high performance :
 jieba & whoosh
 
-# Full Code Reserved
+### Full Code Reserved
